@@ -1,7 +1,7 @@
 name = "wavestk-worker"
 main = "src/index.ts"
 compatibility_date = "2024-11-21"
-account_id = "c677241d7d66ff80103bab9f142128ab"
+# account_id = "<YOUR_ACCOUNT_ID>"  # Optional: Set via wrangler login or CLOUDFLARE_ACCOUNT_ID env var
 
 # R2 Bucket Binding
 [[r2_buckets]]
