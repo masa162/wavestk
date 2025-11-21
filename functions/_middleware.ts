@@ -36,13 +36,9 @@ const basicAuth: PagesFunction<Env> = async (context) => {
     const credentials = atob(authHeader.slice(6));
     const [username, password] = credentials.split(':');
 
-    // Debug: Log environment variables (remove after debugging)
-    console.log('Expected USER:', env.BASIC_AUTH_USER, 'Received:', username);
-    console.log('Expected PASS:', env.BASIC_AUTH_PASS, 'Received:', password);
-
     // Verify credentials
     if (username !== env.BASIC_AUTH_USER || password !== env.BASIC_AUTH_PASS) {
-      return new Response('Unauthorized - Invalid credentials', {
+      return new Response('Unauthorized', {
         status: 401,
         headers: {
           'WWW-Authenticate': 'Basic realm="wavestk Admin"',

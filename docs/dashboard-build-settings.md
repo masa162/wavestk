@@ -39,8 +39,8 @@ Pages Functions（`functions/`ディレクトリ内のコード）は、ビル�
 ダッシュボードで以下が設定されていることも確認してください：
 
 **Variables and Secrets (Production)**:
-- `BASIC_AUTH_USER`: `mn`
-- `BASIC_AUTH_PASS`: `39`
+- `BASIC_AUTH_USER`: `<YOUR_USERNAME>`
+- `BASIC_AUTH_PASS`: `<YOUR_PASSWORD>`
 
 **Bindings (Production)**:
 - D1 database: `DB` → `wavestk-db`

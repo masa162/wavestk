@@ -5,3 +5,10 @@ dist/
 .env
 *.log
 .DS_Store
+
+# Development memos with sensitive information
+docs/memo.md
+
+# Sensitive files
+**/secrets.json
+**/credentials.json

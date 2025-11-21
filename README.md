@@ -82,8 +82,8 @@ npm run deploy:worker
 npm run deploy:pages
 
 # Set environment variables in Cloudflare Dashboard
-# - BASIC_AUTH_USER: mn
-# - BASIC_AUTH_PASS: 39
+# - BASIC_AUTH_USER: <YOUR_USERNAME>
+# - BASIC_AUTH_PASS: <YOUR_PASSWORD>
 # - R2_BUCKET: wavestk-audio (binding)
 # - DB: wavestk-db (binding)
 ```

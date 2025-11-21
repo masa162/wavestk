@@ -43,8 +43,8 @@
 ### 2.2 Cloudflare設定
 
 **アカウント情報**:
-- Account ID: `c677241d7d66ff80103bab9f142128ab`
-- Email: `Belong2jazz@gmail.com`
+- Account ID: (Cloudflare Dashboard から確認)
+- Email: (Your Cloudflare account email)
 
 **R2バケット**:
 - 名前: `wavestk-audio`
@@ -55,8 +55,8 @@
 - 用途: 音声ファイルのメタデータ管理
 
 **Basic認証**:
-- ユーザー名: `mn`
-- パスワード: `39`
+- ユーザー名: (Cloudflare Dashboard で設定)
+- パスワード: (Cloudflare Dashboard で設定)
 
 **カスタムドメイン**:
 - 配信CDN: `wave.be2nd.com`（予定）

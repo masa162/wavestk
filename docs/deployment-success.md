@@ -41,8 +41,8 @@
 - **ライブラリ**: https://wavestk.pages.dev/library.html
 
 ### Basic認証
-- ユーザー名: `mn`
-- パスワード: `39`
+- ユーザー名: `<YOUR_USERNAME>`
+- パスワード: `<YOUR_PASSWORD>`
 
 ---
 
@@ -99,8 +99,8 @@
 **解決**:
 1. `wrangler.toml`から環境変数コメントを削除
 2. ダッシュボードで環境変数を再設定
-   - `BASIC_AUTH_USER`: `mn`
-   - `BASIC_AUTH_PASS`: `39`
+   - `BASIC_AUTH_USER`: `<YOUR_USERNAME>`
+   - `BASIC_AUTH_PASS`: `<YOUR_PASSWORD>`
 
 ---
 

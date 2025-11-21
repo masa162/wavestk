@@ -2,10 +2,10 @@
 
 ## Prerequisites
 
-- Cloudflare account (Account ID: `c677241d7d66ff80103bab9f142128ab`)
+- Cloudflare account
 - Wrangler CLI installed
 - R2 bucket created: `wavestk-audio`
-- D1 database created: `wavestk-db` (ID: `03ec3633-2399-4907-b4e0-763c53395a05`)
+- D1 database created: `wavestk-db`
 - D1 migration executed
 
 ## Step 1: Deploy CDN Worker
@@ -37,8 +37,8 @@ Go to Cloudflare Dashboard:
 
    | Variable | Value | Type |
    |----------|-------|------|
-   | `BASIC_AUTH_USER` | `mn` | Plain text |
-   | `BASIC_AUTH_PASS` | `39` | Plain text |
+   | `BASIC_AUTH_USER` | `<YOUR_USERNAME>` | Plain text |
+   | `BASIC_AUTH_PASS` | `<YOUR_PASSWORD>` | Plain text |
 
 3. Add **Bindings**:
 
@@ -95,7 +95,7 @@ Expected: `200 OK`
 ### Test Pages (with Basic Auth)
 
 ```bash
-curl -u mn:39 https://wavestk-pages.pages.dev/api/health
+curl -u <username>:<password> https://wavestk-pages.pages.dev/api/health
 ```
 
 Expected: `{"status":"ok","service":"wavestk-api"}`

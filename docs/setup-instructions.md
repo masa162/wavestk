@@ -5,7 +5,7 @@
 ✅ GitHubリポジトリ作成: https://github.com/masa162/wavestk
 ✅ コード実装完了（全Phase完了）
 ✅ R2バケット作成: `wavestk-audio`
-✅ D1データベース作成: `wavestk-db` (ID: `03ec3633-2399-4907-b4e0-763c53395a05`)
+✅ D1データベース作成: `wavestk-db` (ID: `<YOUR_DATABASE_ID>`)
 ✅ D1マイグレーション実行
 ✅ CDN Worker デプロイ完了: https://wavestk-worker.belong2jazz.workers.dev
 ✅ GitHubへプッシュ完了
@@ -36,8 +36,8 @@ Pages プロジェクト → Settings → Environment variables → Production
 **Plain text 変数**:
 | Variable | Value |
 |----------|-------|
-| `BASIC_AUTH_USER` | `mn` |
-| `BASIC_AUTH_PASS` | `39` |
+| `BASIC_AUTH_USER` | `<YOUR_USERNAME>` |
+| `BASIC_AUTH_PASS` | `<YOUR_PASSWORD>` |
 
 ### 3. バインディング設定
 
@@ -75,8 +75,8 @@ GitHub連携後、自動デプロイが実行されます。
 - Worker（CDN）: https://wavestk-worker.belong2jazz.workers.dev/healthz
 
 **Basic認証情報**:
-- ユーザー名: `mn`
-- パスワード: `39`
+- ユーザー名: `<YOUR_USERNAME>`
+- パスワード: `<YOUR_PASSWORD>`
 
 ### 6. 動作テスト
 
@@ -114,7 +114,7 @@ GitHubにプッシュすれば自動デプロイされます。
 
 - D1データベースバインディングが正しく設定されているか確認
 - バインディング名が `DB` であることを確認
-- データベースIDが `03ec3633-2399-4907-b4e0-763c53395a05` であることを確認
+- データベースIDが `<YOUR_DATABASE_ID>` であることを確認
 
 ### アップロード後に音声が見つからない（404）
 
