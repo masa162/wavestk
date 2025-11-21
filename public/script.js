@@ -177,15 +177,22 @@ function showSuccess(data) {
     const div = document.createElement('div');
     div.className = 'bg-white rounded p-3 border border-green-200';
     div.innerHTML = `
-      <p class="text-sm font-semibold text-gray-800 mb-1">${file.originalFilename}</p>
+      <p class="text-sm font-semibold text-gray-800 mb-2">${file.originalFilename}</p>
       <div class="space-y-1">
         <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-600 w-12">URL:</span>
           <input type="text" value="${file.url}" readonly class="flex-1 text-xs bg-gray-50 border border-gray-200 rounded px-2 py-1 font-mono">
-          <button onclick="copyToClipboard('${file.url}', this)" class="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700">Copy URL</button>
+          <button onclick="copyToClipboard('${file.url}', this)" class="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 whitespace-nowrap">Copy</button>
         </div>
         <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-600 w-12">HTML:</span>
+          <input type="text" value='<audio controls src="${file.url}"></audio>' readonly class="flex-1 text-xs bg-gray-50 border border-gray-200 rounded px-2 py-1 font-mono">
+          <button onclick="copyToClipboard('<audio controls src=&quot;${file.url}&quot;></audio>', this)" class="text-xs bg-purple-600 text-white px-2 py-1 rounded hover:bg-purple-700 whitespace-nowrap">Copy</button>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-600 w-12">MD:</span>
           <input type="text" value="![audio](${file.url})" readonly class="flex-1 text-xs bg-gray-50 border border-gray-200 rounded px-2 py-1 font-mono">
-          <button onclick="copyToClipboard('![audio](${file.url})', this)" class="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700">Copy MD</button>
+          <button onclick="copyToClipboard('![audio](${file.url})', this)" class="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 whitespace-nowrap">Copy</button>
         </div>
       </div>
     `;

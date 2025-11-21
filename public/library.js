@@ -109,18 +109,24 @@ function renderAudio() {
         </div>
       </div>
 
-      <div class="flex gap-2">
+      <div class="grid grid-cols-3 gap-2">
         <button
-          class="copy-url-btn flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 py-2 px-4 rounded-md text-sm transition-colors"
+          class="copy-url-btn bg-blue-50 text-blue-600 hover:bg-blue-100 py-2 px-3 rounded-md text-sm transition-colors"
           data-url="${audio.url}"
         >
-          📎 Copy URL
+          📎 URL
         </button>
         <button
-          class="copy-markdown-btn flex-1 bg-green-50 text-green-600 hover:bg-green-100 py-2 px-4 rounded-md text-sm transition-colors"
+          class="copy-html-btn bg-purple-50 text-purple-600 hover:bg-purple-100 py-2 px-3 rounded-md text-sm transition-colors"
           data-url="${audio.url}"
         >
-          📝 Copy Markdown
+          🔊 HTML
+        </button>
+        <button
+          class="copy-markdown-btn bg-green-50 text-green-600 hover:bg-green-100 py-2 px-3 rounded-md text-sm transition-colors"
+          data-url="${audio.url}"
+        >
+          📝 MD
         </button>
       </div>
     `;
@@ -137,10 +143,17 @@ function renderAudio() {
     btn.addEventListener('click', () => copyToClipboard(btn.dataset.url, btn, 'URL'));
   });
 
+  document.querySelectorAll('.copy-html-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const html = `<audio controls src="${btn.dataset.url}"></audio>`;
+      copyToClipboard(html, btn, 'HTML');
+    });
+  });
+
   document.querySelectorAll('.copy-markdown-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const markdown = `![audio](${btn.dataset.url})`;
-      copyToClipboard(markdown, btn, 'Markdown');
+      copyToClipboard(markdown, btn, 'MD');
     });
   });
 }
