@@ -1,0 +1,18 @@
+name = "wavestk-pages"
+compatibility_date = "2024-11-21"
+pages_build_output_dir = "public"
+
+# R2 Bucket Binding
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "wavestk-audio"
+
+# D1 Database Binding
+[[d1_databases]]
+binding = "DB"
+database_name = "wavestk-db"
+database_id = "03ec3633-2399-4907-b4e0-763c53395a05"
+
+# Environment Variables (set via Cloudflare Dashboard)
+# BASIC_AUTH_USER = "mn"
+# BASIC_AUTH_PASS = "39"

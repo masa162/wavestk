@@ -1,0 +1,33 @@
+{
+  "name": "wavestk",
+  "version": "1.0.0",
+  "description": "Universal Audio CDN on Cloudflare",
+  "main": "index.js",
+  "scripts": {
+    "dev:worker": "wrangler dev worker/src/index.ts",
+    "dev:pages": "wrangler pages dev public --compatibility-date=2024-11-21",
+    "deploy:worker": "wrangler deploy --config worker/wrangler.toml",
+    "deploy:pages": "wrangler pages deploy public --project-name=wavestk-pages",
+    "db:create": "wrangler d1 create wavestk-db",
+    "db:migrate": "wrangler d1 execute wavestk-db --remote --file=db/migrations/0001_init.sql",
+    "db:migrate:local": "wrangler d1 execute wavestk-db --local --file=db/migrations/0001_init.sql",
+    "r2:create": "wrangler r2 bucket create wavestk-audio"
+  },
+  "keywords": [
+    "audio",
+    "cdn",
+    "cloudflare",
+    "r2",
+    "workers"
+  ],
+  "author": "masa162",
+  "license": "MIT",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241127.0",
+    "typescript": "^5.7.2",
+    "wrangler": "^3.92.0"
+  },
+  "dependencies": {
+    "hono": "^4.6.15"
+  }
+}

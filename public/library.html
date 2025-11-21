@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>wavestk - Audio Library</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <div class="container mx-auto px-4 py-8 max-w-6xl">
+    <!-- Header -->
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-800">wavestk</h1>
+      <p class="text-gray-600 mt-2">Audio Library</p>
+      <nav class="mt-4">
+        <a href="/" class="text-gray-600 hover:text-blue-600 mr-4">Upload</a>
+        <a href="/library.html" class="text-blue-600 font-semibold">Library</a>
+      </nav>
+    </header>
+
+    <!-- Search Filter -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+      <div class="flex gap-4">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search by filename..."
+          class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button id="clearFilters" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
+          Clear
+        </button>
+      </div>
+      <p class="text-sm text-gray-500 mt-2">
+        <span id="resultCount">0</span> audio file(s) found
+      </p>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="text-center py-8">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <p class="text-gray-600 mt-2">Loading...</p>
+    </div>
+
+    <!-- Audio List -->
+    <div id="audioList" class="space-y-4 hidden"></div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="text-center py-12 hidden">
+      <p class="text-gray-500 mb-4">No audio files found</p>
+      <a href="/" class="text-blue-600 hover:underline">Upload Audio →</a>
+    </div>
+
+    <!-- Error -->
+    <div id="error" class="bg-red-50 border border-red-200 rounded-md p-4 hidden">
+      <h3 class="text-red-800 font-semibold mb-2">Error</h3>
+      <p class="text-sm text-red-700" id="errorMessage"></p>
+    </div>
+  </div>
+
+  <script src="/library.js"></script>
+</body>
+</html>
