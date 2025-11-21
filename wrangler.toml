@@ -12,7 +12,3 @@ bucket_name = "wavestk-audio"
 binding = "DB"
 database_name = "wavestk-db"
 database_id = "03ec3633-2399-4907-b4e0-763c53395a05"
-
-# Environment Variables (set via Cloudflare Dashboard)
-# BASIC_AUTH_USER = "mn"
-# BASIC_AUTH_PASS = "39"
