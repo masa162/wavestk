@@ -52,6 +52,177 @@ app.get('/health', (c) => {
 });
 
 /**
+ * Upload audio file chunk
+ * POST /api/upload/chunk
+ */
+app.post('/upload/chunk', async (c) => {
+  try {
+    const body = await c.req.json<{
+      uploadId: string;
+      chunkIndex: number;
+      totalChunks: number;
+      chunkData: string;
+      fileName: string;
+      fileType: string;
+      fileSize: number;
+    }>();
+
+    const { uploadId, chunkIndex, totalChunks, chunkData, fileName, fileType, fileSize } = body;
+
+    // Validate inputs
+    if (!uploadId || chunkIndex === undefined || !totalChunks || !chunkData) {
+      return errorResponse(c, 'Missing required chunk parameters', 400);
+    }
+
+    if (chunkIndex < 0 || chunkIndex >= totalChunks) {
+      return errorResponse(c, 'Invalid chunk index', 400);
+    }
+
+    // Validate audio MIME type
+    if (!fileType.startsWith('audio/')) {
+      return errorResponse(c, 'Only audio files are allowed', 400);
+    }
+
+    // Validate total file size (100MB limit)
+    const MAX_SIZE = 100 * 1024 * 1024;
+    if (fileSize > MAX_SIZE) {
+      return errorResponse(c, `File too large: ${fileName} (max 100MB)`, 400);
+    }
+
+    // Decode Base64 chunk data
+    let base64Data = chunkData;
+    if (base64Data.includes(',')) {
+      base64Data = base64Data.split(',')[1];
+    }
+
+    let binaryData: Uint8Array;
+    try {
+      binaryData = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
+    } catch (error) {
+      return errorResponse(c, 'Invalid Base64 data in chunk', 400);
+    }
+
+    // Store chunk in R2 with temporary name
+    const chunkFilename = `temp/${uploadId}/chunk_${chunkIndex}`;
+    await c.env.R2_BUCKET.put(chunkFilename, binaryData);
+
+    return c.json({
+      uploadId,
+      chunkIndex,
+      received: true,
+    });
+
+  } catch (error) {
+    return handleError(c, error, 'Chunk upload failed');
+  }
+});
+
+/**
+ * Complete chunked upload
+ * POST /api/upload/complete
+ */
+app.post('/upload/complete', async (c) => {
+  try {
+    const body = await c.req.json<{
+      uploadId: string;
+      totalChunks: number;
+      fileName: string;
+      fileType: string;
+      fileSize: number;
+    }>();
+
+    const { uploadId, totalChunks, fileName, fileType, fileSize } = body;
+
+    // Validate inputs
+    if (!uploadId || !totalChunks || !fileName || !fileType || !fileSize) {
+      return errorResponse(c, 'Missing required parameters', 400);
+    }
+
+    // Retrieve all chunks from R2
+    const chunks: Uint8Array[] = [];
+    for (let i = 0; i < totalChunks; i++) {
+      const chunkFilename = `temp/${uploadId}/chunk_${i}`;
+      const chunkObject = await c.env.R2_BUCKET.get(chunkFilename);
+
+      if (!chunkObject) {
+        return errorResponse(c, `Missing chunk ${i}`, 400);
+      }
+
+      const chunkData = await chunkObject.arrayBuffer();
+      chunks.push(new Uint8Array(chunkData));
+    }
+
+    // Combine all chunks
+    const totalSize = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+    const completeFile = new Uint8Array(totalSize);
+    let offset = 0;
+    for (const chunk of chunks) {
+      completeFile.set(chunk, offset);
+      offset += chunk.length;
+    }
+
+    // Generate unique audio ID
+    let audioId: string = '';
+    let exists = true;
+    let attempts = 0;
+    const MAX_ATTEMPTS = 10;
+
+    while (exists && attempts < MAX_ATTEMPTS) {
+      audioId = generateAudioId();
+      const check = await c.env.DB.prepare('SELECT 1 FROM audio_files WHERE id = ?')
+        .bind(audioId)
+        .first();
+      exists = !!check;
+      attempts++;
+    }
+
+    if (exists) {
+      return errorResponse(c, 'Failed to generate unique ID', 500);
+    }
+
+    // Create final filename
+    const ext = getExtension(fileType);
+    const filename = `${audioId}.${ext}`;
+    const url = `https://wave.be2nd.com/${filename}`;
+
+    // Upload complete file to R2
+    await c.env.R2_BUCKET.put(filename, completeFile, {
+      httpMetadata: {
+        contentType: fileType,
+      },
+      customMetadata: {
+        'original-filename': fileName,
+      },
+    });
+
+    // Save metadata to D1
+    const now = new Date().toISOString();
+    await c.env.DB.prepare(`
+      INSERT INTO audio_files (id, filename, original_filename, mime, bytes, url, uploaded_at, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `)
+      .bind(audioId, filename, fileName, fileType, fileSize, url, now, now)
+      .run();
+
+    // Clean up temporary chunks
+    for (let i = 0; i < totalChunks; i++) {
+      const chunkFilename = `temp/${uploadId}/chunk_${i}`;
+      await c.env.R2_BUCKET.delete(chunkFilename);
+    }
+
+    return c.json({
+      id: audioId,
+      filename,
+      url,
+      originalFilename: fileName,
+    });
+
+  } catch (error) {
+    return handleError(c, error, 'Upload completion failed');
+  }
+});
+
+/**
  * Upload audio files
  * POST /api/upload
  */

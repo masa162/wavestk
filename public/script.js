@@ -4,6 +4,8 @@
 
 const API_BASE = '/api';
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+const CHUNK_SIZE = 10 * 1024 * 1024; // 10MB chunks
+const MAX_RETRIES = 3;
 let selectedFiles = [];
 
 // DOM Elements
@@ -93,6 +95,156 @@ function displayFileList() {
   fileList.classList.remove('hidden');
 }
 
+/**
+ * Generate unique upload ID
+ */
+function generateUploadId() {
+  return `upload_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+/**
+ * Split file into chunks and convert to Base64
+ */
+async function splitFileIntoChunks(file) {
+  const chunks = [];
+  const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+
+  for (let i = 0; i < totalChunks; i++) {
+    const start = i * CHUNK_SIZE;
+    const end = Math.min(start + CHUNK_SIZE, file.size);
+    const chunk = file.slice(start, end);
+
+    // Convert chunk to Base64
+    const base64Chunk = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(chunk);
+    });
+
+    chunks.push({
+      index: i,
+      data: base64Chunk,
+      size: chunk.size,
+    });
+  }
+
+  return chunks;
+}
+
+/**
+ * Upload a single chunk with retry logic
+ */
+async function uploadChunk(uploadId, chunkIndex, totalChunks, chunkData, fileName, fileType, fileSize) {
+  let lastError;
+
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      const response = await fetch(`${API_BASE}/upload/chunk`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uploadId,
+          chunkIndex,
+          totalChunks,
+          chunkData,
+          fileName,
+          fileType,
+          fileSize,
+        }),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Chunk upload failed' }));
+        throw new Error(errorData.error || 'Chunk upload failed');
+      }
+
+      return await response.json();
+
+    } catch (error) {
+      lastError = error;
+      console.warn(`Chunk ${chunkIndex} upload attempt ${attempt + 1} failed:`, error.message);
+
+      // Wait before retry (exponential backoff)
+      if (attempt < MAX_RETRIES - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)));
+      }
+    }
+  }
+
+  throw new Error(`Failed to upload chunk ${chunkIndex} after ${MAX_RETRIES} attempts: ${lastError.message}`);
+}
+
+/**
+ * Complete the chunked upload
+ */
+async function completeUpload(uploadId, totalChunks, fileName, fileType, fileSize) {
+  const response = await fetch(`${API_BASE}/upload/complete`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      uploadId,
+      totalChunks,
+      fileName,
+      fileType,
+      fileSize,
+    }),
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: 'Upload completion failed' }));
+    throw new Error(errorData.error || 'Upload completion failed');
+  }
+
+  return await response.json();
+}
+
+/**
+ * Upload a single file using chunked upload
+ */
+async function uploadFileChunked(file, fileIndex, totalFiles) {
+  progressText.textContent = `Processing file ${fileIndex + 1}/${totalFiles}: ${file.name}`;
+
+  // Split file into chunks
+  const chunks = await splitFileIntoChunks(file);
+  const uploadId = generateUploadId();
+  const totalChunks = chunks.length;
+
+  console.log(`Uploading ${file.name} in ${totalChunks} chunks (${CHUNK_SIZE / 1024 / 1024}MB each)`);
+
+  // Upload each chunk sequentially
+  for (let i = 0; i < chunks.length; i++) {
+    const chunk = chunks[i];
+
+    progressText.textContent = `Uploading ${file.name} - Chunk ${i + 1}/${totalChunks}`;
+    const progress = ((fileIndex + (i + 1) / totalChunks) / totalFiles) * 100;
+    progressBar.style.width = `${Math.min(progress, 95)}%`;
+    progressCount.textContent = `${Math.round(progress)}%`;
+
+    await uploadChunk(
+      uploadId,
+      chunk.index,
+      totalChunks,
+      chunk.data,
+      file.name,
+      file.type,
+      file.size
+    );
+  }
+
+  // Complete the upload
+  progressText.textContent = `Finalizing ${file.name}...`;
+  const result = await completeUpload(uploadId, totalChunks, file.name, file.type, file.size);
+
+  return result;
+}
+
 // Upload button click
 uploadBtn.addEventListener('click', async () => {
   if (selectedFiles.length === 0) return;
@@ -102,47 +254,27 @@ uploadBtn.addEventListener('click', async () => {
   showProgress();
 
   try {
-    // Convert files to Base64
-    const filePromises = selectedFiles.map(async (file) => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          resolve({
-            name: file.name,
-            data: reader.result,
-            size: file.size,
-            type: file.type,
-          });
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    });
+    const results = [];
 
-    progressText.textContent = 'Converting files...';
-    const encodedFiles = await Promise.all(filePromises);
-
-    // Upload to API
-    progressText.textContent = 'Uploading to server...';
-    const response = await fetch(`${API_BASE}/upload`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ files: encodedFiles }),
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Upload failed' }));
-      throw new Error(errorData.error || 'Upload failed');
+    // Upload files one by one with chunking
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const file = selectedFiles[i];
+      const result = await uploadFileChunked(file, i, selectedFiles.length);
+      results.push(result);
     }
 
-    const data = await response.json();
-
     // Show success
-    hideProgress();
-    showSuccess(data);
+    progressBar.style.width = '100%';
+    progressCount.textContent = '100%';
+    progressText.textContent = 'Upload complete!';
+
+    setTimeout(() => {
+      hideProgress();
+      showSuccess({
+        uploaded: results.length,
+        files: results,
+      });
+    }, 500);
 
     // Clear selection
     selectedFiles = [];
