@@ -45,6 +45,57 @@ function getExtension(mime: string): string {
 }
 
 /**
+ * Normalize MIME type to standard format
+ * Ensures consistent MIME types for better browser compatibility
+ */
+function normalizeMimeType(mimeType: string, extension: string): string {
+  const mime = mimeType.toLowerCase();
+
+  // M4A/MP4 files should always be audio/mp4
+  if (mime.includes('m4a') || mime.includes('mp4') || extension === 'm4a') {
+    return 'audio/mp4';
+  }
+
+  // AAC files
+  if (mime.includes('aac') || extension === 'aac') {
+    return 'audio/aac';
+  }
+
+  // MP3 files
+  if (mime.includes('mpeg') || mime.includes('mp3') || extension === 'mp3') {
+    return 'audio/mpeg';
+  }
+
+  // WAV files
+  if (mime.includes('wav') || extension === 'wav') {
+    return 'audio/wav';
+  }
+
+  // OGG files
+  if (mime.includes('ogg') || extension === 'ogg') {
+    return 'audio/ogg';
+  }
+
+  // Opus files
+  if (mime.includes('opus') || extension === 'opus') {
+    return 'audio/opus';
+  }
+
+  // FLAC files
+  if (mime.includes('flac') || extension === 'flac') {
+    return 'audio/flac';
+  }
+
+  // WebM files
+  if (mime.includes('webm') || extension === 'webm') {
+    return 'audio/webm';
+  }
+
+  // Return original if no match (but should be validated earlier)
+  return mimeType;
+}
+
+/**
  * Health check endpoint
  */
 app.get('/health', (c) => {
@@ -185,10 +236,13 @@ app.post('/upload/complete', async (c) => {
     const filename = `${audioId}.${ext}`;
     const url = `https://wave.be2nd.com/${filename}`;
 
+    // Normalize MIME type for consistent browser compatibility
+    const normalizedMimeType = normalizeMimeType(fileType, ext);
+
     // Upload complete file to R2
     await c.env.R2_BUCKET.put(filename, completeFile, {
       httpMetadata: {
-        contentType: fileType,
+        contentType: normalizedMimeType,
       },
       customMetadata: {
         'original-filename': fileName,
@@ -201,7 +255,7 @@ app.post('/upload/complete', async (c) => {
       INSERT INTO audio_files (id, filename, original_filename, mime, bytes, url, uploaded_at, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `)
-      .bind(audioId, filename, fileName, fileType, fileSize, url, now, now)
+      .bind(audioId, filename, fileName, normalizedMimeType, fileSize, url, now, now)
       .run();
 
     // Clean up temporary chunks
@@ -274,6 +328,9 @@ app.post('/upload', async (c) => {
       const filename = `${audioId}.${ext}`;
       const url = `https://wave.be2nd.com/${filename}`;
 
+      // Normalize MIME type for consistent browser compatibility
+      const normalizedMimeType = normalizeMimeType(file.type, ext);
+
       // Decode Base64 data
       let base64Data = file.data;
       if (base64Data.includes(',')) {
@@ -291,7 +348,7 @@ app.post('/upload', async (c) => {
       // Upload to R2
       await c.env.R2_BUCKET.put(filename, binaryData, {
         httpMetadata: {
-          contentType: file.type,
+          contentType: normalizedMimeType,
         },
         customMetadata: {
           'original-filename': file.name,
@@ -304,7 +361,7 @@ app.post('/upload', async (c) => {
         INSERT INTO audio_files (id, filename, original_filename, mime, bytes, url, uploaded_at, created_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `)
-        .bind(audioId, filename, file.name, file.type, file.size, url, now, now)
+        .bind(audioId, filename, file.name, normalizedMimeType, file.size, url, now, now)
         .run();
 
       results.push({
