@@ -10,6 +10,11 @@ const basicAuth: PagesFunction<Env> = async (context) => {
   const { request, env, next } = context;
   const url = new URL(request.url);
 
+  // Skip authentication for upload endpoints (used by clasicjlit)
+  if (url.pathname.startsWith('/api/upload/')) {
+    return next();
+  }
+
   // Get Authorization header
   const authHeader = request.headers.get('Authorization');
 
