@@ -5,6 +5,7 @@
 
 import { Hono } from 'hono';
 import { handle } from 'hono/cloudflare-pages';
+import { cors } from 'hono/cors';
 import type {
   Env,
   UploadFile,
@@ -16,6 +17,19 @@ import type {
 import { errorResponse, handleError } from '../errors';
 
 const app = new Hono<{ Bindings: Env }>().basePath('/api');
+
+app.use('/*', cors({
+  origin: [
+    'https://clasicjlit.pages.dev',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000'
+  ],
+  allowMethods: ['POST', 'GET', 'OPTIONS', 'DELETE'],
+  allowHeaders: ['Content-Type', 'Authorization'],
+  exposeHeaders: ['Content-Length'],
+  maxAge: 600,
+  credentials: true,
+}));
 
 /**
  * Generate random 8-character alphanumeric ID
