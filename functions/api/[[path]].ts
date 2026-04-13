@@ -248,7 +248,8 @@ app.post('/upload/complete', async (c) => {
     // Create final filename
     const ext = getExtension(fileType);
     const filename = `${audioId}.${ext}`;
-    const url = `https://wave.be2nd.com/${filename}`;
+    const cdnDomain = c.env.CDN_DOMAIN || 'https://wave.masa86.com';
+    const url = `${cdnDomain}/${filename}`;
 
     // Normalize MIME type for consistent browser compatibility
     const normalizedMimeType = normalizeMimeType(fileType, ext);
@@ -340,7 +341,8 @@ app.post('/upload', async (c) => {
       // Create filename
       const ext = getExtension(file.type);
       const filename = `${audioId}.${ext}`;
-      const url = `https://wave.be2nd.com/${filename}`;
+      const cdnDomain = c.env.CDN_DOMAIN || 'https://wave.masa86.com';
+      const url = `${cdnDomain}/${filename}`;
 
       // Normalize MIME type for consistent browser compatibility
       const normalizedMimeType = normalizeMimeType(file.type, ext);

@@ -8,7 +8,7 @@ wavestk is a simple, fast, and stable audio CDN built on Cloudflare infrastructu
 
 ## Features
 
-- Simple URL embedding: `![audio](https://wave.be2nd.com/abc123de.mp3)`
+- Simple URL embedding: `![audio](https://wave.masa86.com/abc123de.mp3)`
 - Web-based upload interface
 - HTTP Range Request support (seekable audio playback)
 - Audio library with search, preview, and delete functions
@@ -21,7 +21,8 @@ wavestk is a simple, fast, and stable audio CDN built on Cloudflare infrastructu
 
 ```
 wavestk/
-├── worker/          # CDN delivery Worker (wave.be2nd.com)
+├── worker/          # CDN delivery Worker (wave.masa86.com)
+├── redirect-worker/ # Redirect Worker (wave.be2nd.com → wave.masa86.com)
 ├── functions/       # Pages Functions API (Hono)
 ├── public/          # Admin UI (static HTML + JS)
 ├── db/              # D1 database schema
@@ -91,17 +92,21 @@ npm run deploy:pages
 ### Custom Domain Setup
 
 1. Worker (CDN delivery)
-   - Set custom domain: `wave.be2nd.com`
-   - Update `public/library.js` with the new domain
+   - Set custom domain: `wave.masa86.com`
+   - Set environment variable: `CDN_DOMAIN=https://wave.masa86.com`
 
 2. Pages (Admin UI) - Optional
-   - Set custom domain: `admin-wave.be2nd.com`
+   - Set custom domain: `admin-wave.masa86.com`
+
+3. Redirect Worker (for migration) - Optional
+   - Deploy redirect-worker to `wave.be2nd.com`
+   - Automatically redirects old URLs to new domain
 
 ## Usage
 
 ### Upload Audio
 
-1. Access admin page: `https://admin-wave.be2nd.com/` (or Workers URL)
+1. Access admin page: `https://admin-wave.masa86.com/` (or Workers URL)
 2. Log in with Basic Auth credentials
 3. Drag & drop audio files or click to select
 4. Click "Upload" button
@@ -110,18 +115,18 @@ npm run deploy:pages
 ### Embed in Blog
 
 ```markdown
-![audio](https://wave.be2nd.com/abc123de.mp3)
+![audio](https://wave.masa86.com/abc123de.mp3)
 ```
 
 Or use HTML `<audio>` tag:
 
 ```html
-<audio controls src="https://wave.be2nd.com/abc123de.mp3"></audio>
+<audio controls src="https://wave.masa86.com/abc123de.mp3"></audio>
 ```
 
 ### Manage Audio Library
 
-1. Access library page: `https://admin-wave.be2nd.com/library.html`
+1. Access library page: `https://admin-wave.masa86.com/library.html`
 2. Search by filename
 3. Preview audio with built-in player
 4. Copy URL or Markdown code

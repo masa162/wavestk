@@ -7,6 +7,7 @@ export interface Env {
   DB: D1Database;
   BASIC_AUTH_USER: string;
   BASIC_AUTH_PASS: string;
+  CDN_DOMAIN?: string; // e.g., https://wave.masa86.com
 }
 
 export interface UploadFile {

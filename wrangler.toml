@@ -12,3 +12,10 @@ bucket_name = "wavestk-audio"
 binding = "DB"
 database_name = "wavestk-db"
 database_id = "03ec3633-2399-4907-b4e0-763c53395a05"
+
+# Environment Variables
+# Set CDN_DOMAIN in Cloudflare Dashboard > Settings > Environment variables
+# Production: CDN_DOMAIN = https://wave.masa86.com
+# For local development, uncomment below:
+# [vars]
+# CDN_DOMAIN = "https://wave.masa86.com"

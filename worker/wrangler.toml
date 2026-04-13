@@ -9,4 +9,5 @@ binding = "R2_BUCKET"
 bucket_name = "wavestk-audio"
 
 # Custom Domain (set via Cloudflare Dashboard)
-# wave.be2nd.com
+# NEW: wave.masa86.com
+# OLD: wave.be2nd.com (will redirect to new domain)

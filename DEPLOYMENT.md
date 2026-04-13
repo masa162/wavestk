@@ -50,39 +50,55 @@ Go to Cloudflare Dashboard:
    - Variable name: `DB`
    - D1 database: `wavestk-db`
 
-## Step 4: Set Custom Domains (Optional)
+## Step 4: Set Custom Domains
 
-### For CDN Worker (wave.be2nd.com)
+### For CDN Worker (wave.masa86.com)
 
 1. Go to **Workers & Pages** → **wavestk-worker** → **Settings** → **Triggers**
 2. Click **Add Custom Domain**
-3. Enter: `wave.be2nd.com`
+3. Enter: `wave.masa86.com`
 4. Follow DNS setup instructions (Cloudflare will auto-configure if domain is on Cloudflare)
 
-### For Pages Admin (admin-wave.be2nd.com) - Optional
+### For Pages Admin (admin-wave.masa86.com) - Optional
 
 1. Go to **Workers & Pages** → **wavestk-pages** → **Custom domains**
 2. Click **Set up a custom domain**
-3. Enter: `admin-wave.be2nd.com`
+3. Enter: `admin-wave.masa86.com`
 4. Follow DNS setup instructions
 
-## Step 5: Update URL in Code (if using custom domain)
+## Step 5: Set Environment Variable for CDN Domain
 
-If you set up `wave.be2nd.com` as the CDN domain, update the following files:
+Go to Cloudflare Dashboard:
 
-**File: `functions/api/[[path]].ts`**
+1. Navigate to **Workers & Pages** → **wavestk-pages** → **Settings** → **Environment variables**
+2. Add the following variable for **Production**:
 
-Change line ~93:
-```typescript
-const url = `https://wave.be2nd.com/${filename}`;
-```
+   | Variable | Value | Type |
+   |----------|-------|------|
+   | `CDN_DOMAIN` | `https://wave.masa86.com` | Plain text |
 
-Redeploy Pages:
+3. Click **Save**
+
+This allows the API to generate correct URLs for uploaded files.
+
+## Step 6: Deploy Redirect Worker (for migration from wave.be2nd.com)
+
+**Optional but recommended** if you have existing links on `wave.be2nd.com`:
+
 ```bash
-npx wrangler pages deploy public --project-name=wavestk-pages
+cd redirect-worker
+npx wrangler deploy
 ```
 
-## Step 6: Test the Deployment
+Then set custom domain:
+1. Go to **Workers & Pages** → **wavestk-redirect** → **Settings** → **Triggers**
+2. Click **Add Custom Domain**
+3. Enter: `wave.be2nd.com`
+4. This will redirect all old URLs to the new domain automatically
+
+Keep this redirect active for 6-12 months to ensure existing links continue to work.
+
+## Step 7: Test the Deployment
 
 ### Test CDN Worker
 

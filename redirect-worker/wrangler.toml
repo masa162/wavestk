@@ -1,0 +1,6 @@
+name = "wavestk-redirect"
+main = "index.ts"
+compatibility_date = "2024-11-21"
+
+# Custom Domain (set via Cloudflare Dashboard)
+# wave.be2nd.com - redirects to wave.masa86.com
